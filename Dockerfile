@@ -1,11 +1,20 @@
 FROM rust:latest AS builder
 
-run set -xe; \
+RUN set -xe; \
 	apt-get update; \
 	apt-get install -y musl musl-tools; \
 	rm -rf /var/lib/apt/lists/*; \
-	rustup target add x86_64-unknown-linux-musl; \
+	rustup target add x86_64-unknown-linux-musl;
+
+ARG MDBOOK_VERSION
+ENV MDBOOK_VERSION=$MDBOOK_VERSION
+
+RUN set -xe; \
+	if [ "${MDBOOK_VERSION}" = "" ]; then \
 	cargo install --target x86_64-unknown-linux-musl mdbook; \
+	else \
+	cargo install --target x86_64-unknown-linux-musl mdbook --version ${MDBOOK_VERSION}; \
+	fi; \
 	mv /usr/local/cargo/bin/mdbook .; \
 	rm -rf /usr/local/cargo/registry;
 
